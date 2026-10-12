@@ -15,6 +15,7 @@ import searchSanityGuests from "./tools/search-sanity-guests";
 import updateSanityGuest from "./tools/update-sanity-guest";
 import updateSanityWorkshop from "./tools/update-sanity-workshop";
 import updateWorkshop from "./tools/update-workshop";
+import updateWorkshopCover from "./tools/update-workshop-cover";
 import uploadLumaImage from "./tools/upload-luma-image";
 
 export function createEventAgent() {
@@ -107,6 +108,15 @@ When the event ID is not provided, resolve the event before making changes:
 5. If no good match exists after the full search, explain that the event may be older, managed by another calendar, or otherwise unavailable to the listing tool, then ask for the event ID
 6. Once the event is resolved, call get-luma-event and then update-workshop
 
+### Updating Cover Images
+
+When the user asks to replace a workshop picture or cover image:
+1. Resolve the workshop using list-luma-events when its event ID is not provided
+2. If the request includes an image attached in Slack, use the "Attached workshop image uploaded to Luma" URL included with the message
+3. Otherwise, use the public image URL supplied by the user
+4. Call update-workshop-cover with the event ID and image URL; do not use update-workshop because a cover-only change does not require a complete event snapshot
+5. The tool updates Luma and synchronizes the corresponding Sanity workshop image
+
 Build a complete final snapshot for update-workshop.
 
 1. Copy title, customDescription, startAt, duration, coverUrl, and meetingUrl from get-luma-event when the user did not change them
@@ -143,6 +153,7 @@ When deleting from both Luma and Sanity and the event ID is not provided, follow
       updateSanityGuest,
       updateSanityWorkshop,
       updateWorkshop,
+      updateWorkshopCover,
       uploadLumaImage,
     },
     defaultOptions: {
