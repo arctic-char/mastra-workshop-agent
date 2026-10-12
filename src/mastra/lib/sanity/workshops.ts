@@ -2,6 +2,7 @@ import type { SanityClient } from '@sanity/client';
 import { randomUUID } from 'node:crypto';
 import type { LumaEvent } from '../luma/client';
 import { getSanityClient } from './client';
+import { WORKSHOP_DOCUMENT_TYPE, WORKSHOP_PEOPLE_FIELD } from './config';
 
 export interface WorkshopHostInput {
   guestId?: string;
@@ -26,8 +27,6 @@ interface ExistingWorkshopDoc {
 
 type WorkshopPeopleField = 'hostReferences' | 'speakers' | 'hosts' | 'guests';
 type WorkshopGuestReference = { _key: string; _type: 'reference'; _ref: string };
-const DEFAULT_WORKSHOP_PEOPLE_FIELD: WorkshopPeopleField = 'hostReferences';
-const WORKSHOP_PEOPLE_FIELDS: WorkshopPeopleField[] = ['hostReferences', 'speakers', 'hosts', 'guests'];
 const LEGACY_WORKSHOP_PEOPLE_FIELDS: WorkshopPeopleField[] = ['speakers', 'hosts'];
 
 function slugify(value: string): string {
@@ -130,21 +129,6 @@ async function uploadLumaCoverImage(client: SanityClient, event: LumaEvent) {
       _ref: asset._id,
     },
   };
-}
-
-function getWorkshopPeopleField(): WorkshopPeopleField {
-  const configured = process.env.SANITY_WORKSHOP_PEOPLE_FIELD;
-  if (!configured) {
-    return DEFAULT_WORKSHOP_PEOPLE_FIELD;
-  }
-
-  if (WORKSHOP_PEOPLE_FIELDS.includes(configured as WorkshopPeopleField)) {
-    return configured as WorkshopPeopleField;
-  }
-
-  throw new Error(
-    `SANITY_WORKSHOP_PEOPLE_FIELD must be one of: ${WORKSHOP_PEOPLE_FIELDS.join(', ')}`,
-  );
 }
 
 async function findOrCreateGuest(client: SanityClient, host: WorkshopHostInput): Promise<string> {
@@ -282,12 +266,12 @@ export async function upsertWorkshopFromLumaEvent(
   hosts?: WorkshopHostInput[],
 ): Promise<{ docId: string; action: 'created' | 'updated' }> {
   const client = getSanityClient();
-  const docType = process.env.SANITY_WORKSHOP_DOC_TYPE || 'workshop';
+  const docType = WORKSHOP_DOCUMENT_TYPE;
   const existingDoc = await findExistingWorkshopDoc(client, docType, event.url);
 
   const setFields = mapLumaEventToSanityFields(event);
   if (hosts && hosts.length > 0) {
-    const peopleField = getWorkshopPeopleField();
+    const peopleField = WORKSHOP_PEOPLE_FIELD;
     setFields[peopleField] = await buildGuestReferences(client, hosts);
   }
 
@@ -299,7 +283,7 @@ export async function upsertWorkshopFromLumaEvent(
   }
 
   if (existingDoc?._id) {
-    const peopleField = getWorkshopPeopleField();
+    const peopleField = WORKSHOP_PEOPLE_FIELD;
     const stalePeopleFields = LEGACY_WORKSHOP_PEOPLE_FIELDS.filter((field) => field !== peopleField);
     await client.patch(existingDoc._id).set(setFields).unset(stalePeopleFields).commit();
     return { docId: existingDoc._id, action: 'updated' };
@@ -319,7 +303,7 @@ export async function deleteWorkshopFromSanity(input: {
   eventUrl?: string;
 }): Promise<{ deleted: boolean; docId?: string }> {
   const client = getSanityClient();
-  const docType = process.env.SANITY_WORKSHOP_DOC_TYPE || 'workshop';
+  const docType = WORKSHOP_DOCUMENT_TYPE;
   const existingDoc = await findWorkshopDocByIdOrUrl(client, docType, input.docId, input.eventUrl);
 
   if (!existingDoc?._id) {

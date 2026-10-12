@@ -2,6 +2,7 @@ import { createTool } from '@mastra/core/tools';
 import type { QueryParams } from '@sanity/client';
 import { z } from 'zod';
 import { getSanityClient } from '../../../lib/sanity/client';
+import { WORKSHOP_DOCUMENT_TYPE } from '../../../lib/sanity/config';
 
 const workshopSchema = z.object({
   documentId: z.string(),
@@ -34,7 +35,7 @@ const listSanityWorkshopsTool = createTool({
   }),
   execute: async ({ query, lumaUrl, afterDate, beforeDate, limit }) => {
     const client = getSanityClient();
-    const docType = process.env.SANITY_WORKSHOP_DOC_TYPE || 'workshop';
+    const docType = WORKSHOP_DOCUMENT_TYPE;
     const filters = [
       '_type == $docType',
       '!(_id in path("drafts.**"))',

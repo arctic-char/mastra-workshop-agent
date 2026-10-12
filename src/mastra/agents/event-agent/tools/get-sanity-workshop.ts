@@ -2,6 +2,7 @@ import { createTool } from '@mastra/core/tools';
 import type { QueryParams } from '@sanity/client';
 import { z } from 'zod';
 import { getSanityClient } from '../../../lib/sanity/client';
+import { WORKSHOP_DOCUMENT_TYPE } from '../../../lib/sanity/config';
 
 const sanityWorkshopSchema = z.object({
   documentId: z.string(),
@@ -26,7 +27,7 @@ const getSanityWorkshopTool = createTool({
   outputSchema: sanityWorkshopSchema,
   execute: async ({ documentId }) => {
     const client = getSanityClient();
-    const docType = process.env.SANITY_WORKSHOP_DOC_TYPE || 'workshop';
+    const docType = WORKSHOP_DOCUMENT_TYPE;
     const params: QueryParams = { documentId, docType };
     const workshop = await client.fetch<SanityWorkshop | null, QueryParams>(
       `*[

@@ -2,6 +2,7 @@ import { createTool } from '@mastra/core/tools';
 import type { QueryParams } from '@sanity/client';
 import { z } from 'zod';
 import { getSanityClient } from '../../../lib/sanity/client';
+import { WORKSHOP_DOCUMENT_TYPE } from '../../../lib/sanity/config';
 
 const sanityWorkshopSchema = z.object({
   documentId: z.string(),
@@ -29,7 +30,7 @@ const changeSchema = z.discriminatedUnion('field', [
 
 async function getWorkshop(documentId: string): Promise<SanityWorkshop | null> {
   const client = getSanityClient();
-  const docType = process.env.SANITY_WORKSHOP_DOC_TYPE || 'workshop';
+  const docType = WORKSHOP_DOCUMENT_TYPE;
   const params: QueryParams = { documentId, docType };
 
   return client.fetch<SanityWorkshop | null, QueryParams>(

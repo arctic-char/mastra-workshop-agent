@@ -2,6 +2,7 @@ import { createTool } from '@mastra/core/tools';
 import type { QueryParams } from '@sanity/client';
 import { z } from 'zod';
 import { getSanityClient } from '../../../lib/sanity/client';
+import { WORKSHOP_DOCUMENT_TYPE } from '../../../lib/sanity/config';
 
 interface SanityWorkshopIdentity {
   documentId: string;
@@ -11,7 +12,7 @@ interface SanityWorkshopIdentity {
 
 async function getWorkshopIdentity(documentId: string): Promise<SanityWorkshopIdentity | null> {
   const client = getSanityClient();
-  const docType = process.env.SANITY_WORKSHOP_DOC_TYPE || 'workshop';
+  const docType = WORKSHOP_DOCUMENT_TYPE;
   const params: QueryParams = { documentId, docType };
 
   return client.fetch<SanityWorkshopIdentity | null, QueryParams>(
@@ -44,7 +45,7 @@ const deleteSanityWorkshopTool = createTool({
   }),
   execute: async ({ documentId, expectedTitle, expectedRevision }) => {
     const client = getSanityClient();
-    const docType = process.env.SANITY_WORKSHOP_DOC_TYPE || 'workshop';
+    const docType = WORKSHOP_DOCUMENT_TYPE;
     const current = await getWorkshopIdentity(documentId);
     if (!current) {
       throw new Error(`Published Sanity workshop not found: ${documentId}`);
