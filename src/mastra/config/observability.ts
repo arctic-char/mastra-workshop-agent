@@ -1,17 +1,14 @@
-import { Observability, SensitiveDataFilter } from "@mastra/observability";
-import { BraintrustExporter } from "@mastra/braintrust";
-
-const projectName = process.env.BRAINTRUST_PROJECT_NAME || "workshop-agent";
+import {
+  MastraPlatformExporter,
+  Observability,
+  SensitiveDataFilter,
+} from "@mastra/observability";
 
 export default new Observability({
   configs: {
     default: {
       serviceName: "workshop-agent",
-      exporters: [
-        new BraintrustExporter({
-          projectName,
-        }),
-      ],
+      exporters: [new MastraPlatformExporter()],
       spanOutputProcessors: [new SensitiveDataFilter()],
     },
   },
