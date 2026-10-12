@@ -1,4 +1,3 @@
-import { createSlackAdapter } from "@chat-adapter/slack";
 import { Agent } from "@mastra/core/agent";
 import memory from "./memory";
 import { workshopDescriptionWriter } from "./skills/workshop-description-writer";
@@ -17,8 +16,6 @@ import updateSanityGuest from "./tools/update-sanity-guest";
 import updateSanityWorkshop from "./tools/update-sanity-workshop";
 import updateWorkshop from "./tools/update-workshop";
 import uploadLumaImage from "./tools/upload-luma-image";
-
-const isProd = process.env.NODE_ENV === "production";
 
 export function createEventAgent() {
   return new Agent({
@@ -148,16 +145,6 @@ When deleting from both Luma and Sanity and the event ID is not provided, follow
       updateWorkshop,
       uploadLumaImage,
     },
-    ...(isProd
-      ? {
-          channels: {
-            adapters: {
-              // Use post-and-edit streaming so standard Markdown is rendered consistently in Slack.
-              slack: createSlackAdapter({ nativeStreaming: false }),
-            },
-          },
-        }
-      : {}),
     defaultOptions: {
       requireToolApproval: false,
     },

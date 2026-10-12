@@ -1,3 +1,4 @@
+import { channels } from "@mastra/connect";
 import { Mastra } from "@mastra/core/mastra";
 import { eventAgent } from "./agents/event-agent";
 import logger from "./config/logger";
@@ -8,6 +9,7 @@ export const mastra = new Mastra({
   agents: {
     "event-agent": eventAgent,
   },
+  channels: await channels({ providers: ["slack"] }),
   logger,
   observability,
   storage,
