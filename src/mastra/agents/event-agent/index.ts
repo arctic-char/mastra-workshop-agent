@@ -139,7 +139,7 @@ When deleting from both Luma and Sanity and the event ID is not provided, follow
     model: "openai/gpt-5.6-sol",
     memory,
     skills: [workshopDescriptionWriter],
-    tools: tools({ providers: ["linear"] }).with({
+    tools: tools().with({
       createSanityGuest,
       createWorkshop,
       deleteSanityWorkshop,
